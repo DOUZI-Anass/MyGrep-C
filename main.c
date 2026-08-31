@@ -6,8 +6,7 @@
 FILE *ouvertureFichier(char *fichierArg){
     FILE *fichier = fopen(fichierArg, "r");
 
-    if (fichier == NULL)
-    {
+    if (fichier == NULL){
         printf("Erreur : impossible d'ouvrir le fichier\n");
         return NULL;
     }
@@ -19,7 +18,7 @@ int ignorerMajMin(const char *texte, const char *mot){
     char textTemp[1024];
     char motTemp[1024];
 
-    for(int i=0;i<strlen(texte);i++){
+    for(int i = 0 ; i < strlen(texte) ; i++){
         textTemp[i] = tolower((unsigned char)texte[i]);
     }
     textTemp[strlen(texte)] = '\0';
@@ -39,27 +38,32 @@ int ignorerMajMin(const char *texte, const char *mot){
 void rechercher(FILE *fichier, char *motChercher, int optionN, int optionI, int optionV){
     char ligne[1024];
     int count = 1;
-
+    int nbTrv = 0;
     while (fgets(ligne, sizeof(ligne), fichier) != NULL){
+        int trouver;
         if(optionI){
-            if(ignorerMajMin(ligne,motChercher) == 1){
-                printf("%s",ligne);
-            }  
+            trouver = ignorerMajMin(ligne,motChercher);
         }
-        else if(optionV){
-            if(strstr(ligne,motChercher)==NULL){
-                printf("%s",ligne);
-            }
+        else{
+            trouver = strstr(ligne,motChercher) != NULL;
         }
-        else if (strstr(ligne, motChercher) != NULL){
+        if(optionV){
+            trouver = !trouver;
+        }
+        if (trouver){
             if (optionN){
                 printf("%d. %s", count, ligne);
             }
             else{
                 printf("%s", ligne);
             }
+        nbTrv++;
         }
+        
         count++;
+    }
+    if(nbTrv == 0){
+        printf("Aucun mot trouvé \n");
     }
 }
 
@@ -72,42 +76,41 @@ int main(int argc, char *argv[]){
     int optionI = 0;
     int optionV = 0;
 
-    if (argc == 3){
-        motChercher = argv[1];
-        fichierArg = argv[2];
-    }
-    else if (argc == 4){
-        if (strcmp(argv[1], "-n") == 0){
-            optionN = 1;
-            motChercher = argv[2];
-            fichierArg = argv[3];
-        }
-        else if(strcmp(argv[1], "-i")==0){
-            optionI = 1;
-            motChercher = argv[2];
-            fichierArg = argv[3];
-        }
-        else if(strcmp(argv[1],"-v") == 0){
-            optionV = 1;
-            motChercher = argv[2];
-            fichierArg = argv[3];            
-        }
-        else{
-            printf("Mauvais parametre \n");
-            return 1;
-        }
+    if (argc < 3){
+        printf("Erreur : Mauvais nombre d'argument !");
+        return 0;
     }
     else{
-        printf("Mauvais nombre d'arguments\n");
-        return 1;
+        motChercher = argv[argc - 2];
+        fichierArg = argv[argc - 1];
+        
+        for(int i = 1; i < argc-2; i++){
+            if(strcmp(argv[i], "-n") == 0){
+                optionN = 1;
+            }
+            else if(strcmp(argv[i], "-i") == 0){
+                optionI = 1;
+            }
+            else if (strcmp(argv[i], "-v") == 0){
+                optionV = 1;
+            }
+            else{
+                printf("Erreur : Mauvais argument \n");
+                return 0;
+            }
+        }
     }
 
     FILE *fichier = ouvertureFichier(fichierArg);
     if (fichier ==NULL){ 
         return 1;
     }
+
     rechercher(fichier,motChercher,optionN,optionI, optionV);
+    
     printf("\n");
+    
     fclose(fichier);
+    
     return 0;
 }
