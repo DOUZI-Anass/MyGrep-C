@@ -15,7 +15,7 @@ FILE *ouvertureFichier(char *fichierArg){
 }
 
 
-int contientIgnoreCase(const char *texte, const char *mot){
+int ignorerMajMin(const char *texte, const char *mot){
     char textTemp[1024];
     char motTemp[1024];
 
@@ -36,15 +36,20 @@ int contientIgnoreCase(const char *texte, const char *mot){
 }
 
 
-void rechercher(FILE *fichier, char *motChercher, int optionN, int optionI){
+void rechercher(FILE *fichier, char *motChercher, int optionN, int optionI, int optionV){
     char ligne[1024];
     int count = 1;
 
     while (fgets(ligne, sizeof(ligne), fichier) != NULL){
         if(optionI){
-            if(contientIgnoreCase(ligne,motChercher) ==1){
+            if(ignorerMajMin(ligne,motChercher) == 1){
                 printf("%s",ligne);
             }  
+        }
+        else if(optionV){
+            if(strstr(ligne,motChercher)==NULL){
+                printf("%s",ligne);
+            }
         }
         else if (strstr(ligne, motChercher) != NULL){
             if (optionN){
@@ -54,7 +59,6 @@ void rechercher(FILE *fichier, char *motChercher, int optionN, int optionI){
                 printf("%s", ligne);
             }
         }
-        
         count++;
     }
 }
@@ -66,6 +70,7 @@ int main(int argc, char *argv[]){
 
     int optionN = 0;
     int optionI = 0;
+    int optionV = 0;
 
     if (argc == 3){
         motChercher = argv[1];
@@ -82,6 +87,11 @@ int main(int argc, char *argv[]){
             motChercher = argv[2];
             fichierArg = argv[3];
         }
+        else if(strcmp(argv[1],"-v") == 0){
+            optionV = 1;
+            motChercher = argv[2];
+            fichierArg = argv[3];            
+        }
         else{
             printf("Mauvais parametre \n");
             return 1;
@@ -96,7 +106,7 @@ int main(int argc, char *argv[]){
     if (fichier ==NULL){ 
         return 1;
     }
-    rechercher(fichier,motChercher,optionN,optionI);
+    rechercher(fichier,motChercher,optionN,optionI, optionV);
     printf("\n");
     fclose(fichier);
     return 0;
